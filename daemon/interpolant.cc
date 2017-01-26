@@ -28,8 +28,11 @@ Interpolant::Interpolant(const char* filename){
   int r;
 	N=0;
   while((r=fscanf(file,"%f %f\n",&val1,&val2))!=EOF){
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
     if(r==2)N++;
     else fgets(junk,sizeof(junk),file);
+#pragma GCC diagnostic pop
   }
 	rewind(file);
 	px=new real[N];
@@ -38,7 +41,10 @@ Interpolant::Interpolant(const char* filename){
   while((r=fscanf(file,"%f %f\n",&val1,&val2))!=EOF){
     line++;
     if(r!=2){
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
       fgets(junk,sizeof(junk),file);
+#pragma GCC diagnostic pop
       #ifndef _NOWARNINGS
       clog<<"WARNING:Bad data in file \""<<filename<<"\" at line "<<line<<endl;
       #endif

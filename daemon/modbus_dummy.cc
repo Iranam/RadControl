@@ -61,6 +61,9 @@ int modbus_read_registers(modbus_t*ctx,int addr,int nb,uint16_t *dest){
 int modbus_write_register(modbus_t *ctx, int addr, int value){
   return 1;
 }
+int modbus_write_registers(modbus_t *ctx, int addr, int value,uint16_t *src){
+  return 1;
+}
 float modbus_get_float(const uint16_t *src){
   union{float ret;uint16_t buf[2];};
   buf[0]=src[0];

@@ -115,7 +115,7 @@ OBJDIR = $(OBJ_DIR)
 #------------------------------------------------------------------------------
 ifndef OUTPUT_DIR
 ifeq ($(PROJECT_TYPE),DEVICE)
-	OUTPUT_DIR= /bin
+	OUTPUT_DIR=./bin
 else
 ifeq ($(PROJECT_TYPE),STATIC_LIB)
 	OUTPUT_DIR= /lib
@@ -123,7 +123,7 @@ else
 ifeq ($(PROJECT_TYPE),SHARED_LIB)
 	OUTPUT_DIR= /lib
 else
-	OUTPUT_DIR= /bin
+	OUTPUT_DIR=./bin
 endif
 endif
 endif
@@ -181,7 +181,7 @@ CFLAGS +=	-D_REENTRANT -W -pipe $(INCLUDE_DIRS) $(CFLAGS_USER)
 #------------------------------------------------------------------------------
 #-- LDFLAGS
 #------------------------------------------------------------------------------
-LDFLAGS =
+LDFLAGS = -lrt
 
 ifeq ($(PROJECT_TYPE),SHARED_LIB)
 	LDFLAGS +=	-shared -O -Wl,-soname,lib$(PROJECT_NAME).so

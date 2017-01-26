@@ -11,26 +11,26 @@
 #include<unistd.h>
 #include<fcntl.h>
 #include<signal.h>
-#include<time.h>//WIP:rewrite chrono to unix time
+#include<time.h>
 #include<mqueue.h>
 #include<thread>
+#include<string.h>
 #include<string>
 using std::string;
-#include"../DetectorData.h"
+#include"IPC.h"
 #include"Detector.h"
 using namespace detector;
 #include<QSqlDatabase>
 #include<QSqlQuery>
 
 modbus_t*ctx;
-uint NDETECTORS=9;
+uint8_t NDETECTORS=9;
 uint default_modbus_ids[]={1,2,3,4,5,6,7,20,21};
 uint*modbus_ids=default_modbus_ids;
 QSqlDatabase db;
 Detector*detectors=nullptr;
 char*shmem;
 mqd_t message_queue;
-const char* MQNAME="/RadControl";
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 char*node_name="/dev/ttyS0";
@@ -77,6 +77,18 @@ void load_options(){
 #pragma GCC diagnostic pop
 }
 
+void cleanup(){
+  if(detectors!=nullptr)delete[]detectors;
+  mq_close(message_queue);
+  mq_unlink(MQNAME);
+  munmap(shmem,NDETECTORS*sizeof(DetectorData)+DATA_OFFSET);
+#ifndef NODATABASE
+  if(db.open())db.close();
+#endif
+  modbus_close(ctx);
+  modbus_free(ctx);
+}
+
 void signal_handler(int signum){
   string msg="Stopped";
   switch(signum){
@@ -84,17 +96,48 @@ void signal_handler(int signum){
     case SIGSEGV:msg+=":SEGFAULT";break;
     case SIGTERM:msg+=":killed";break;
   }
-  if(detectors!=nullptr)delete[]detectors;
   log(msg);
-  mq_close(message_queue);
-  mq_unlink(MQNAME);
-  munmap(shmem,NDETECTORS*sizeof(DetectorData)+4);
-#ifndef NODATABASE
-  if(db.open())db.close();
-#endif
-  modbus_close(ctx);
-  modbus_free(ctx);
+  cleanup();
   exit(signum);
+}
+
+void handle_message(char*mbuf){
+  Command cmd=Command(mbuf[0]);
+  if(cmd==Command::SHUTDOWN){
+      log("Stopped:received a SHUTDOWN message");
+      cleanup();
+      exit(0);
+  }
+  if(cmd==Command::SET_EXPOSURE||cmd==Command::SET_EXPOSURE_BY_COUNT||cmd==Command::SET_SENSITIVITY){
+  uchar modbus_id=mbuf[1];
+  for(uint i=0;i<NDETECTORS;++i)if(detectors[i].d->modbus_id==modbus_id){
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch"
+  switch(cmd){
+    case Command::SET_EXPOSURE:{
+      uint arg;
+      memcpy(&arg,mbuf+2,4);
+      detectors[i].set_exposure(arg);
+      break;
+    }case Command::SET_EXPOSURE_BY_COUNT:{
+      uint arg;
+      memcpy(&arg,mbuf+2,4);
+      detectors[i].set_exposure_by_count(arg);
+      break;
+    }case Command::SET_SENSITIVITY:{
+      float arg;
+      memcpy(&arg,mbuf+2,4);
+      detectors[i].set_sensitivity(arg);
+      break;
+    }
+  }
+#pragma GCC diagnostic pop
+  break;   
+  }
+}
+#ifdef DEBUG
+printf("DEBUG:Message received\n");
+#endif
 }
 
 enum class Exception{MODBUS_CONNECTION_FAILED,OPEN_MMAP_FILE_FAILED,RESIZE_MMAP_FILE_FAILED,MMAP_FAILED,OPEN_MESSAGE_QUEUE_FAILED};
@@ -126,20 +169,20 @@ try{
   int fd=open("/tmp/radcontrol",O_RDWR|O_CREAT,0644);//user can read/write, other can only read
   if(fd==-1)throw Exception::OPEN_MMAP_FILE_FAILED;
   //Make sure the file is large enough, resize it using lseek and write:
-  lseek(fd,4+NDETECTORS*sizeof(DetectorData)-1,SEEK_SET);
+  lseek(fd,NDETECTORS*sizeof(DetectorData)-1+DATA_OFFSET,SEEK_SET);
   if(write(fd,"",1)!=1)throw Exception::RESIZE_MMAP_FILE_FAILED;//write \0, resizing the file
-  shmem=(char*)mmap(NULL,NDETECTORS*sizeof(DetectorData)+4,PROT_WRITE|PROT_READ,MAP_SHARED,fd,0);
+  shmem=(char*)mmap(NULL,NDETECTORS*sizeof(DetectorData)+DATA_OFFSET,PROT_WRITE|PROT_READ,MAP_SHARED,fd,0);
   if(shmem==MAP_FAILED)throw Exception::MMAP_FAILED;
   close(fd);
   //Create detector objects and initialize detector data
-  *((int32_t*)shmem)=NDETECTORS;//write number of detectors into first 4 bytes of mapped file
-  DetectorData*data=(DetectorData*)(shmem+4);//other bytes are array of DetectorData
+  *((char*)shmem+NUMBER_OFFSET)=NDETECTORS;//write number of detectors to shared memory
+  DetectorData*data=(DetectorData*)(shmem+DATA_OFFSET);//other bytes are array of DetectorData
   detectors=new Detector[NDETECTORS];
   //Open message queue for incoming commands
   {mq_attr attr;
   attr.mq_flags=0;//blocking mode
   attr.mq_maxmsg=10;
-  attr.mq_msgsize=4;
+  attr.mq_msgsize=MESSAGE_MAX_SIZE;
   mq_unlink(MQNAME);//delete message queue if it exists
   message_queue=mq_open(MQNAME,O_RDONLY|O_CREAT,00666,&attr);
   if(message_queue==-1)throw Exception::OPEN_MESSAGE_QUEUE_FAILED;
@@ -153,7 +196,7 @@ try{
 		msync(shmem,NDETECTORS*sizeof(DetectorData),MS_ASYNC|MS_INVALIDATE);
   }
 #ifdef DUMMY
- log("Started in DUMMY MODE");
+  log("Started in DUMMY MODE");
 #else
   log("Started");
 #endif
@@ -186,14 +229,11 @@ try{
     //int next_tv_sec=duration_cast<milliseconds>(last_update-steady_clock::now()).count()+min;
     //WIP
     timespec timeout=last_update+min;
-    char mbuf[4];
+    char mbuf[MESSAGE_MAX_SIZE];
     while(mq_timedreceive(message_queue,mbuf,sizeof(mbuf),NULL,&timeout)!=-1){
-      //TODO handle messages
-#ifdef DEBUG
-      printf("DEBUG:Message received\n");
-#endif
+      handle_message(mbuf);
     }
-    //mq_timedreceive return -1 on timeout
+    //mq_timedreceive returns -1 on timeout
     //we suppose mq_timedreceive may return -1 only in that case
   }
   }

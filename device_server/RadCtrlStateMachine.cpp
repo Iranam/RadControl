@@ -74,17 +74,17 @@ bool RadCtrl::is_background_allowed(TANGO_UNUSED(Tango::AttReqType type))
 
 //--------------------------------------------------------
 /**
- *	Method      : RadCtrl::is_exposition_allowed()
- *	Description : Execution allowed for exposition attribute
+ *	Method      : RadCtrl::is_exposure_allowed()
+ *	Description : Execution allowed for exposure attribute
  */
 //--------------------------------------------------------
-bool RadCtrl::is_exposition_allowed(TANGO_UNUSED(Tango::AttReqType type))
+bool RadCtrl::is_exposure_allowed(TANGO_UNUSED(Tango::AttReqType type))
 {
 
-	//	Not any excluded states for exposition attribute in read access.
-	/*----- PROTECTED REGION ID(RadCtrl::expositionStateAllowed_READ) ENABLED START -----*/
+	//	Not any excluded states for exposure attribute in read access.
+	/*----- PROTECTED REGION ID(RadCtrl::exposureStateAllowed_READ) ENABLED START -----*/
 	
-	/*----- PROTECTED REGION END -----*/	//	RadCtrl::expositionStateAllowed_READ
+	/*----- PROTECTED REGION END -----*/	//	RadCtrl::exposureStateAllowed_READ
 	return true;
 }
 
@@ -108,6 +108,21 @@ bool RadCtrl::is_modbus_id_allowed(TANGO_UNUSED(Tango::AttReqType type))
 //=================================================
 //		Commands Allowed Methods
 //=================================================
+
+//--------------------------------------------------------
+/**
+ *	Method      : RadCtrl::is_setExposure_allowed()
+ *	Description : Execution allowed for setExposure attribute
+ */
+//--------------------------------------------------------
+bool RadCtrl::is_setExposure_allowed(TANGO_UNUSED(const CORBA::Any &any))
+{
+	//	Not any excluded states for setExposure command.
+	/*----- PROTECTED REGION ID(RadCtrl::setExposureStateAllowed) ENABLED START -----*/
+	
+	/*----- PROTECTED REGION END -----*/	//	RadCtrl::setExposureStateAllowed
+	return true;
+}
 
 
 /*----- PROTECTED REGION ID(RadCtrl::RadCtrlStateAllowed.AdditionalMethods) ENABLED START -----*/

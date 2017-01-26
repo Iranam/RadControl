@@ -1,4 +1,5 @@
 #include"Detector.h"
+#include"MainWindow.h"
 #include<QBrush>
 #include<QGraphicsSimpleTextItem>
 #include<QGraphicsProxyWidget>
@@ -35,14 +36,15 @@ Detector::Detector(const QPointF&pos,DetectorData*ndata,QGraphicsItem*parent):
   //layout->addItem(line_proxy);
   //setLayout(layout);
   update();
+  mainwindow->scene->addItem(this);//SEGFAULT !?
+  connect(mainwindow->timer,SIGNAL(timeout()),this,SLOT(update()));
 }
 void Detector::update(){
   DetectorData d=*data;
   if(d.state==DetectorState::OK){
     body->setBrush(QBrush(qRgb(138,226,52)));
-    QString text;
     float bg=d.background;
-    text.sprintf("%.3f",bg);
+    QString text=QString::fromUtf8("%1 \u00B5Sv/h").arg(bg,0,'f',2);
     if(bg<0.09)line->setStyleSheet("QLineEdit{color:black;background:rgb(138,226,52);}");
     else if(bg<10)line->setStyleSheet("QLineEdit{color:black;background:yellow;}");
     else line->setStyleSheet("QLineEdit{color:white;background:red;}");

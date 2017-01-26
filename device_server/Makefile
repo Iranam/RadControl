@@ -20,7 +20,7 @@
 #=============================================================================
 # MAKE_ENV is the path to find common environment to buil project
 #
-MAKE_ENV =/usr/local/share/pogo/preferences
+MAKE_ENV =.
 
 #=============================================================================
 # PACKAGE_NAME is the name of the library/device/exe you want to build
@@ -83,7 +83,7 @@ LIB_DIR_USER=
 # you must use '-lA -lB' in this order as link flags, otherwise you will get
 # 'undefined reference' errors
 #
-LFLAGS_USR+=-lm $(shell pkg-config --libs libmodbus)
+LFLAGS_USR+=-lrt -lm $(shell pkg-config --libs libmodbus)
 
 
 #=============================================================================

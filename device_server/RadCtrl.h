@@ -53,7 +53,7 @@ public:
 public:
 	Tango::DevULong	*attr_count_read;
 	Tango::DevFloat	*attr_background_read;
-	Tango::DevUShort	*attr_exposition_read;
+	Tango::DevUShort	*attr_exposure_read;
 	Tango::DevUChar	*attr_modbus_id_read;
 
 //	Constructors and destructors
@@ -131,14 +131,14 @@ public:
 	virtual void read_background(Tango::Attribute &attr);
 	virtual bool is_background_allowed(Tango::AttReqType type);
 /**
- *	Attribute exposition related methods
+ *	Attribute exposure related methods
  *	Description: 
  *
  *	Data type:	Tango::DevUShort
  *	Attr type:	Scalar
  */
-	virtual void read_exposition(Tango::Attribute &attr);
-	virtual bool is_exposition_allowed(Tango::AttReqType type);
+	virtual void read_exposure(Tango::Attribute &attr);
+	virtual bool is_exposure_allowed(Tango::AttReqType type);
 /**
  *	Attribute modbus_id related methods
  *	Description: 
@@ -163,6 +163,14 @@ public:
 
 //	Command related methods
 public:
+	/**
+	 *	Command setExposure related method
+	 *	Description: Set exposure in milliseconds
+	 *
+	 *	@param argin milliseconds
+	 */
+	virtual void set_exposure(Tango::DevUShort argin);
+	virtual bool is_setExposure_allowed(const CORBA::Any &any);
 
 
 	//--------------------------------------------------------

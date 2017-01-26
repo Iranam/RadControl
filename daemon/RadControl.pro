@@ -1,6 +1,6 @@
 TEMPLATE=app
 QT+=core sql
-DEFINES+=DEBUG DUMMY 
+DEFINES+=DUMMY #DEBUG
 DEFINES+=NODATABASE
 CONFIG+=Debug #Release
 MODBUS_INCLUDES=`pkg-config --cflags libmodbus`
@@ -13,6 +13,7 @@ MOC_DIR=moc
 OBJECTS_DIR=obj
 INCLUDEPATH+=..
 HEADERS=../DetectorData.h\
+../IPC.h\
 Detector.h\
 interpolant.h\
 modbus_dummy.h

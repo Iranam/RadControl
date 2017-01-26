@@ -27,9 +27,8 @@ void Detector::init(DetectorData*nd){
   d->state=DetectorState::INIT;
   d->count=0;
   d->background=0;
-  d->exposition=0;
-  d->exposition_by_count=0;
-	d->touched=false;
+  d->exposure=0;
+  d->exposure_by_count=0;
   //modbus_id must be set by main()
   configured=false;
   data_ready=false;
@@ -60,14 +59,77 @@ void Detector::detector_log(string msg){
   log("Detector"+to_string(d->modbus_id)+':'+msg);
 }
 enum UpdateException{LOST_CONNECTION,UNEXPECTED_BLOCK_SIZE,CALIBRATION_FAILED,BAD_SLAVE_ID};
-void Detector::update(){
-	debug_print(d->modbus_id);
-  time_to_update=1000;//default;
+void Detector::switch_slave(){
   if(modbus_set_slave(ctx,d->modbus_id)==-1)throw BAD_SLAVE_ID;
   usleep(50);//wait for slave timeout. Experiment shows wait times of 2mcs are sufficient.
   //libmodbus disregards modbus protocol timings, which may cause slaves to
   //miss requests if slave timout is not short enough.
   //check "man 7 libmodbus" for more info
+}
+void Detector::set_exposure(uint val){
+  d->exposure=val;
+  switch_slave();
+  if(d->type==DetectorType::GAMMA){
+    //set exposure(register 125)(milliseconds)
+    if(modbus_write_register(ctx,125,val)<0){
+      handle_connection_loss();
+      return;
+    }
+  }else if(d->type==DetectorType::NEUTRON){
+    //set exposure(register 49)(seconds)
+    if(modbus_write_register(ctx,49,val)<0){
+      handle_connection_loss();
+      return;
+    }
+  }else return;
+	d->state=DetectorState::INIT;
+	data_ready=false;
+}
+void Detector::set_exposure_by_count(uint val){
+  d->exposure_by_count=val;
+  switch_slave();
+  if(d->type==DetectorType::NEUTRON){
+    //set exposure by count (register 21)(impulses)
+    if(modbus_write_register(ctx,21,val)<0){
+      handle_connection_loss();
+      return;
+    }
+  }else return;//gamma detectors have no exposure by count functionality
+	d->state=DetectorState::INIT;
+	data_ready=false;
+}
+void Detector::set_sensitivity(float val){
+  d->sensitivity=val;
+  switch_slave();
+  if(d->type==DetectorType::NEUTRON){
+    union{
+      uint16_t u[2];
+      float uval;
+    };
+    uval=val;
+    //set sensitivity(register 28-29)(impulses)
+    if(modbus_write_registers(ctx,28,2,u)<0){
+      handle_connection_loss();
+      return;
+    }
+  }else return;//gamma detectors have no sensitivity registers
+	d->state=DetectorState::INIT;
+	data_ready=false;
+}
+void Detector::handle_connection_loss(){
+  if(!problem_connection){
+    detector_log("Connection lost");
+    problem_connection=true;
+  }
+  configured=false;//if power went down, settings in detector registers are lost and must be re-set
+  data_ready=false;
+  d->state=DetectorState::NO_CONNECTION;
+  time_to_update=10000;//next update in 10 seconds
+}
+void Detector::update(){
+	debug_print(d->modbus_id);
+  time_to_update=1000;//default;
+  switch_slave();
   try{
     //1.Determine type
     if(d->type==DetectorType::UNKNOWN_TYPE){
@@ -75,22 +137,21 @@ void Detector::update(){
       if(modbus_read_registers(ctx,3,1,&block)<0)throw LOST_CONNECTION;
       if(block==20){
 				d->type=DetectorType::NEUTRON;
-			  d->exposition=1;
-			  d->exposition_by_count=0;
+			  d->exposure=1;
+			  d->exposure_by_count=0;
 			}
       else if(block==100){
 				d->type=DetectorType::GAMMA;
-			  d->exposition=300;
+			  d->exposure=300;
 			}
       else throw UNEXPECTED_BLOCK_SIZE;
     }
     //2.Configure
     if(!configured){
-      //TODO set sensitivity, exposition....
-
+      //TODO set sensitivity, exposure....
       if(d->type==DetectorType::GAMMA){
-        //set exposition(register 125) to default=300(milliseconds)
-        if(modbus_write_register(ctx,125,d->exposition)<0)throw LOST_CONNECTION;
+        //set exposure(register 125) to default=300(milliseconds)
+        if(modbus_write_register(ctx,125,d->exposure)<0)throw LOST_CONNECTION;
         if(calibration==nullptr){
           string path="calibration/"+to_string(d->modbus_id)+".txt";
           try{
@@ -104,34 +165,15 @@ void Detector::update(){
           }
         }
       }else{//NEUTRON
-			  debug_print("set exposition")
-        //set exposition(register 49) to default=1(seconds)
-        if(modbus_write_register(ctx,49,d->exposition)<0)throw LOST_CONNECTION;
-        //set exposition by count (register 21) to default=100(impulses)
-        if(modbus_write_register(ctx,21,d->exposition_by_count)<0)throw LOST_CONNECTION;
+			  debug_print("set exposure")
+        //set exposure(register 49) to default=1(seconds)
+        if(modbus_write_register(ctx,49,d->exposure)<0)throw LOST_CONNECTION;
+        //set exposure by count (register 21) to default=100(impulses)
+        if(modbus_write_register(ctx,21,d->exposure_by_count)<0)throw LOST_CONNECTION;
         //TODO sensitivity
         //if(modbus_write_register(ctx,36,1)<0)throw LOST_CONNECTION;
       }
 			configured=true;
-    }
-		//2.5. reconfigure detector if settings were changed
-		if(d->touched){
-			data_ready=false;
-			d->state=DetectorState::INIT;
-      if(d->type==DetectorType::GAMMA){
-        //set exposition(register 125)(milliseconds)
-        if(modbus_write_register(ctx,125,d->exposition)<0)throw LOST_CONNECTION;
-        debug_print(d->exposition);
-      }else{//NEUTRON
-        //set exposition(register 49)(seconds)
-        if(modbus_write_register(ctx,49,d->exposition)<0)throw LOST_CONNECTION;
-        debug_print(d->exposition);
-        //set exposition by count (register 21)(impulses)
-        if(modbus_write_register(ctx,21,d->exposition_by_count)<0)throw LOST_CONNECTION;
-        debug_print(d->exposition_by_count);
-      }
-			d->touched=false;
-			return;//wait for next update after reconfiguring
     }
     //3.assure data is ready
     if(!data_ready){
@@ -173,8 +215,8 @@ void Detector::update(){
       query.bindValue(0,QVariant(d->modbus_id));
       query.bindValue(1,QVariant(d->background));
       query.bindValue(2,QVariant(d->count));
-      query.bindValue(3,QVariant(d->exposition));
-      query.bindValue(4,QVariant(d->exposition_by_count));
+      query.bindValue(3,QVariant(d->exposure));
+      query.bindValue(4,QVariant(d->exposure_by_count));
       //TODO Check if query was successful
       bool ok=query.exec();
     }
@@ -186,7 +228,7 @@ void Detector::update(){
       problem_connection=false;
     }
     d->state=DetectorState::OK;
-    {int t=d->exposition;
+    {int t=d->exposure;
     if(t<=100)t=300;
     time_to_update=t;
     }
@@ -201,14 +243,7 @@ void Detector::update(){
       break;
     }
     case LOST_CONNECTION:{
-      if(!problem_connection){
-        detector_log("Connection lost");
-        problem_connection=true;
-      }
-      configured=false;//if power went down, settings in detector registers are lost and must be re-set
-      data_ready=false;
-      d->state=DetectorState::NO_CONNECTION;
-      time_to_update=10000;//next update in 10 seconds
+      handle_connection_loss();
       break;
     }
     case UNEXPECTED_BLOCK_SIZE:{

@@ -10,5 +10,6 @@ void modbus_free(modbus_t *ctx);
 int modbus_set_slave(modbus_t *ctx, int slave);
 int modbus_read_registers(modbus_t*ctx,int addr,int nb,uint16_t *dest);
 int modbus_write_register(modbus_t *ctx, int addr, int value);
+int modbus_write_registers(modbus_t *ctx, int addr, int value,uint16_t *src);
 float modbus_get_float(const uint16_t *src);
 void modbus_set_response_timeout(modbus_t*ctx,struct timeval*timeout);

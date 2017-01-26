@@ -8,21 +8,23 @@ using namespace std;
 #include<fcntl.h>
 #include<QStatusBar>
 #include<QString>
-#include<QGraphicsScene>
 #include<QGraphicsView>
 #include<QGridLayout>
 //#include<QPushButton>
-#include<QTimer>
 //#include<QSignalMapper>
 #include<QMessageBox>
 #include<QGraphicsSvgItem>
+#include"IPC.h"
+using namespace detector;
 #include"Detector.h"
 
 uint NDETECTORS=9;
 uint modbus_ids[]={1,2,3,4,5,6,7,20,21};
+MainWindow*mainwindow;
 
 MainWindow::MainWindow(QWidget *parent):
   QMainWindow(parent){
+  mainwindow=this;
   //Open shared data file, where detector data is stored
   int fd=open("/tmp/radcontrol",O_RDONLY);
   if(fd==-1){
@@ -31,18 +33,18 @@ MainWindow::MainWindow(QWidget *parent):
     exit(-1);
   }
   shmem=(char*)
-    mmap(NULL,4+NDETECTORS*sizeof(DetectorData),PROT_READ,MAP_SHARED,fd,0);
+    mmap(NULL,DATA_OFFSET+NDETECTORS*sizeof(DetectorData),PROT_READ,MAP_SHARED,fd,0);
   if(shmem==MAP_FAILED){
     //TODO errorbox
     cerr<<"mmap failed"<<endl;
     exit(-1);
   }
   ::close(fd);
-  DetectorData*data=(DetectorData*)(shmem+4);//first 4 bytes are number of detectors
+  DetectorData*data=(DetectorData*)(shmem+DATA_OFFSET);
 	QWidget*central_widget=new QWidget(this);
 	setCentralWidget(central_widget);
   QGridLayout*layout=new QGridLayout(central_widget);
-  QGraphicsScene*scene=new QGraphicsScene(this);
+  scene=new QGraphicsScene(this);
   scene->setSceneRect(QRectF(0,0,800,512));
   QGraphicsView*view=new QGraphicsView(scene);
   view->setDragMode(QGraphicsView::ScrollHandDrag);
@@ -52,36 +54,18 @@ MainWindow::MainWindow(QWidget *parent):
   //rect->setBrush(QBrush(Qt::green));
   //scene->addItem(rect);
   scene->addItem(new QGraphicsSvgItem("Background.svg"));
-	QTimer*timer=new QTimer(this);
-  Detector*d=new Detector(QPointF(96,64),data+0);
-  scene->addItem(d);
-  connect(timer,SIGNAL(timeout()),d,SLOT(update()));
-  d=new Detector(QPointF(192,64),data+8);
-  scene->addItem(d);
-  connect(timer,SIGNAL(timeout()),d,SLOT(update()));
-  d=new Detector(QPointF(448,64),data+1);
-  scene->addItem(d);
-  connect(timer,SIGNAL(timeout()),d,SLOT(update()));
-  d=new Detector(QPointF(64,144),data+3);
-  scene->addItem(d);
-  connect(timer,SIGNAL(timeout()),d,SLOT(update()));
-  d=new Detector(QPointF(160,144),data+7);
-  scene->addItem(d);
-  connect(timer,SIGNAL(timeout()),d,SLOT(update()));
-  d=new Detector(QPointF(320,144),data+4);
-  scene->addItem(d);
-  connect(timer,SIGNAL(timeout()),d,SLOT(update()));
-  d=new Detector(QPointF(512,144),data+5);
-  scene->addItem(d);
-  connect(timer,SIGNAL(timeout()),d,SLOT(update()));
-  d=new Detector(QPointF(704,144),data+6);
-  scene->addItem(d);
-  connect(timer,SIGNAL(timeout()),d,SLOT(update()));
-  d=new Detector(QPointF(128,272),data+2);
-  scene->addItem(d);
-  connect(timer,SIGNAL(timeout()),d,SLOT(update()));
-  //scene->addItem(new Detector(QPointF(0,64)));
-  //scene->addItem(new Detector(QPointF(100,100)));
+  timer=new QTimer(this);
+  //Create detectors
+  //Detector constructor adds it to the scene and connects it to timer
+  new Detector(QPointF(96,64),data+0);
+  new Detector(QPointF(192,64),data+8);
+  new Detector(QPointF(448,64),data+1);
+  new Detector(QPointF(64,144),data+3);
+  new Detector(QPointF(160,144),data+7);
+  new Detector(QPointF(320,144),data+4);
+  new Detector(QPointF(512,144),data+5);
+  new Detector(QPointF(704,144),data+6);
+  new Detector(QPointF(128,272),data+2);
 	timer->start(1000);
 }
 /*

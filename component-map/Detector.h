@@ -23,4 +23,19 @@ private:
 public slots:
   void update();
 };
+
+/*
+class DetectorWindow:public QWidget{Q_OBJECT
+public:
+  DetectorWindow();
+private:
+  QLineEdit*line_exp,*line_expc;
+  DetectorData*data;
+public slots:
+  void update();
+  void setExp();//set exposition
+  void setExpc();//set exposition by count
+//how to connect DetectorWindow to timer?
+}
+*/
 #endif // DETECTOR_H
