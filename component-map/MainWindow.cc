@@ -21,6 +21,8 @@ using namespace detector;
 uint NDETECTORS=9;
 uint modbus_ids[]={1,2,3,4,5,6,7,20,21};
 MainWindow*mainwindow;
+static const int WIDTH=1024;
+static const int HEIGHT=512;
 
 MainWindow::MainWindow(QWidget *parent):
   QMainWindow(parent){
@@ -45,11 +47,11 @@ MainWindow::MainWindow(QWidget *parent):
 	setCentralWidget(central_widget);
   QGridLayout*layout=new QGridLayout(central_widget);
   scene=new QGraphicsScene(this);
-  scene->setSceneRect(QRectF(0,0,800,512));
+  scene->setSceneRect(QRectF(0,0,WIDTH,HEIGHT));
   QGraphicsView*view=new QGraphicsView(scene);
   view->setDragMode(QGraphicsView::ScrollHandDrag);
   layout->addWidget(view);
-  setGeometry(0,0,864,640);
+  setGeometry(0,0,WIDTH+64,HEIGHT+64);
   //QGraphicsRectItem*rect=new QGraphicsRectItem(QRectF(50,50,150,150));
   //rect->setBrush(QBrush(Qt::green));
   //scene->addItem(rect);
@@ -57,15 +59,15 @@ MainWindow::MainWindow(QWidget *parent):
   timer=new QTimer(this);
   //Create detectors
   //Detector constructor adds it to the scene and connects it to timer
-  new Detector(QPointF(96,64),data+0);
-  new Detector(QPointF(192,64),data+8);
+  new Detector(QPointF(64,64),data+0);
+  new Detector(QPointF(176,64),data+8);
   new Detector(QPointF(448,64),data+1);
-  new Detector(QPointF(64,144),data+3);
-  new Detector(QPointF(160,144),data+7);
-  new Detector(QPointF(320,144),data+4);
-  new Detector(QPointF(512,144),data+5);
-  new Detector(QPointF(704,144),data+6);
-  new Detector(QPointF(128,272),data+2);
+  new Detector(QPointF(256,144),data+3);
+  new Detector(QPointF(368,144),data+7);
+  new Detector(QPointF(544,144),data+4);
+  new Detector(QPointF(720,144),data+5);
+  new Detector(QPointF(912,144),data+6);
+  new Detector(QPointF(192,272),data+2);
 	timer->start(1000);
 }
 /*

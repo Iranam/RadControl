@@ -6,7 +6,7 @@
 #include<QGraphicsLinearLayout>
 //Detector::Detector(const QPointF&pos,QGraphicsItem*parent):
 const int HEIGHT=48;
-const int WIDTH=80;
+const int WIDTH=96;
 Detector::Detector(const QPointF&pos,DetectorData*ndata,QGraphicsItem*parent):
   QGraphicsWidget(parent){
   setGeometry(QRectF(pos,QSizeF(WIDTH,HEIGHT)));
@@ -17,9 +17,10 @@ Detector::Detector(const QPointF&pos,DetectorData*ndata,QGraphicsItem*parent):
   line=new QLineEdit();
   line->setToolTip(QString("Background(%1Sv/h)").arg(QChar(0x03bc)));
   line_proxy->setWidget(line);
-  line_proxy->setGeometry(QRectF(2,HEIGHT-26,WIDTH-4,24));
-  QGraphicsSimpleTextItem*label=new QGraphicsSimpleTextItem(this);
-  label->setPos(QPointF(4,2));
+  line_proxy->setGeometry(QRectF(2,HEIGHT-26,WIDTH-34,18));
+  QGraphicsSimpleTextItem*name=new QGraphicsSimpleTextItem(this);
+ // name->setPos(QPointF(24,4));
+  name->setPos(QPointF(4,4));
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wwrite-strings"
   char*detector_name;
@@ -29,14 +30,12 @@ Detector::Detector(const QPointF&pos,DetectorData*ndata,QGraphicsItem*parent):
     default:detector_name="Unknown";
   }
 #pragma GCC diagnostic pop
-  label->setText(QString("%1 %2").arg(detector_name).arg(data->modbus_id));
-  //label_proxy->setGeometry(QRectF(2,HEIGHT-26,WIDTH-4,24));
-  //QGraphicsLinearLayout*layout=new QGraphicsLinearLayout();
-  //layout->addItem(rect);
-  //layout->addItem(line_proxy);
-  //setLayout(layout);
+  name->setText(QString("%1 %2").arg(detector_name).arg(data->modbus_id));
+  QGraphicsSimpleTextItem*units=new QGraphicsSimpleTextItem(this);
+  units->setPos(QPointF(64,26));
+  units->setText(QString::fromUtf8("\u00B5Sv/h"));
   update();
-  mainwindow->scene->addItem(this);//SEGFAULT !?
+  mainwindow->scene->addItem(this);
   connect(mainwindow->timer,SIGNAL(timeout()),this,SLOT(update()));
 }
 void Detector::update(){
@@ -44,7 +43,7 @@ void Detector::update(){
   if(d.state==DetectorState::OK){
     body->setBrush(QBrush(qRgb(138,226,52)));
     float bg=d.background;
-    QString text=QString::fromUtf8("%1 \u00B5Sv/h").arg(bg,0,'f',2);
+    QString text=QString::fromUtf8("%1").arg(bg,0,'f',3);
     if(bg<0.09)line->setStyleSheet("QLineEdit{color:black;background:rgb(138,226,52);}");
     else if(bg<10)line->setStyleSheet("QLineEdit{color:black;background:yellow;}");
     else line->setStyleSheet("QLineEdit{color:white;background:red;}");
