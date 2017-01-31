@@ -66,7 +66,7 @@ void Detector::switch_slave(){
   //miss requests if slave timout is not short enough.
   //check "man 7 libmodbus" for more info
 }
-void Detector::set_exposure(uint val){
+void Detector::set_exposure(uint16_t val){
   d->exposure=val;
   switch_slave();
   if(d->type==DetectorType::GAMMA){
@@ -85,7 +85,7 @@ void Detector::set_exposure(uint val){
 	d->state=DetectorState::INIT;
 	data_ready=false;
 }
-void Detector::set_exposure_by_count(uint val){
+void Detector::set_exposure_by_count(uint16_t val){
   d->exposure_by_count=val;
   switch_slave();
   if(d->type==DetectorType::NEUTRON){
@@ -127,7 +127,6 @@ void Detector::handle_connection_loss(){
   time_to_update=10000;//next update in 10 seconds
 }
 void Detector::update(){
-	debug_print(d->modbus_id);
   time_to_update=1000;//default;
   switch_slave();
   try{
@@ -165,7 +164,6 @@ void Detector::update(){
           }
         }
       }else{//NEUTRON
-			  debug_print("set exposure")
         //set exposure(register 49) to default=1(seconds)
         if(modbus_write_register(ctx,49,d->exposure)<0)throw LOST_CONNECTION;
         //set exposure by count (register 21) to default=100(impulses)
@@ -205,8 +203,6 @@ void Detector::update(){
       d->count=buf[0];
       d->background=modbus_get_float(buf+5);
     }
-		debug_print(d->background);
-		debug_print(d->count);
     //5.write data to database
 #ifndef NODATABASE
     if(db.open()){
@@ -230,6 +226,7 @@ void Detector::update(){
     d->state=DetectorState::OK;
     {int t=d->exposure;
     if(t<=100)t=300;
+    if(t>=10000)t=10000;
     time_to_update=t;
     }
   }catch(UpdateException e){

@@ -10,8 +10,8 @@ public:
   ~Detector();
   void init(DetectorData*);
   void update();
-  void set_exposure(uint val);
-  void set_exposure_by_count(uint val);
+  void set_exposure(uint16_t val);
+  void set_exposure_by_count(uint16_t val);
   void set_sensitivity(float val);
   int time_to_update;//milliseconds, set by update(), decreased by main()
   DetectorData*d;

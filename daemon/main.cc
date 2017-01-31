@@ -104,9 +104,9 @@ void signal_handler(int signum){
 void handle_message(char*mbuf){
   Command cmd=Command(mbuf[0]);
   if(cmd==Command::SHUTDOWN){
-      log("Stopped:received a SHUTDOWN message");
-      cleanup();
-      exit(0);
+    log("Stopped:received a SHUTDOWN message");
+    cleanup();
+    exit(0);
   }
   if(cmd==Command::SET_EXPOSURE||cmd==Command::SET_EXPOSURE_BY_COUNT||cmd==Command::SET_SENSITIVITY){
   uchar modbus_id=mbuf[1];
@@ -115,13 +115,17 @@ void handle_message(char*mbuf){
 #pragma GCC diagnostic ignored "-Wswitch"
   switch(cmd){
     case Command::SET_EXPOSURE:{
-      uint arg;
-      memcpy(&arg,mbuf+2,4);
+      uint16_t arg;
+      memcpy(&arg,mbuf+2,sizeof(arg));
       detectors[i].set_exposure(arg);
+#ifdef DEBUG
+printf("DEBUG:SET EXPOSURE %i\n",arg);
+printf("DEBUG:%i %i\n",mbuf[3],mbuf[4]);
+#endif
       break;
     }case Command::SET_EXPOSURE_BY_COUNT:{
-      uint arg;
-      memcpy(&arg,mbuf+2,4);
+      uint16_t arg;
+      memcpy(&arg,mbuf+2,sizeof(arg));
       detectors[i].set_exposure_by_count(arg);
       break;
     }case Command::SET_SENSITIVITY:{
@@ -135,9 +139,6 @@ void handle_message(char*mbuf){
   break;   
   }
 }
-#ifdef DEBUG
-printf("DEBUG:Message received\n");
-#endif
 }
 
 enum class Exception{MODBUS_CONNECTION_FAILED,OPEN_MMAP_FILE_FAILED,RESIZE_MMAP_FILE_FAILED,MMAP_FAILED,OPEN_MESSAGE_QUEUE_FAILED};

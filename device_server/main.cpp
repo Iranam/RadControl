@@ -4,6 +4,7 @@
 #include<sys/stat.h>
 #include<mqueue.h>
 mqd_t message_queue;//global
+#include"../IPC.h"
 
 // Check if crash reporting is used.
 #if defined(ENABLE_CRASH_REPORT)
@@ -16,6 +17,7 @@ mqd_t message_queue;//global
 
 void init_message_queue(){
   //open message queue to send commands to RadControl daemon
+  using namespace detector;
   message_queue=mq_open(MQNAME,O_WRONLY|O_NONBLOCK);
   if(message_queue==-1){
 		cerr<<"Failed to open message queue, exiting"<<endl;

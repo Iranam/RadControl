@@ -260,10 +260,12 @@ void RadCtrl::set_exposure(Tango::DevUShort argin)
 {
 	DEBUG_STREAM << "RadCtrl::setExposure()  - " << device_name << endl;
 	/*----- PROTECTED REGION ID(RadCtrl::set_exposure) ENABLED START -----*/
-	mq_send(message_queue)
-    //WIP
-	//	Add your own code
-	
+  char buf[4];
+  buf[0]=char(detector::Command::SET_EXPOSURE);
+  buf[1]=uchar(data->modbus_id);
+  buf[2]=uchar(argin);
+  buf[3]=uchar(argin>>8);
+	mq_send(message_queue,buf,sizeof(buf),1);
 	/*----- PROTECTED REGION END -----*/	//	RadCtrl::set_exposure
 }
 //--------------------------------------------------------
@@ -286,27 +288,27 @@ void RadCtrl::determine_state(){
   switch(data->state){
     case DetectorState::OK:{
       set_state(Tango::ON);
-      set_status("Device server is ready");
+      set_status("Device is OK");
       return;
     }
     case DetectorState::DISABLED:{
       set_state(Tango::OFF);
-      set_status("Device server is disabled");
+      set_status("Device is disabled");
       return;
     }
     case DetectorState::INIT:{
       set_state(Tango::INIT);
-			set_status("Device server is waiting for the detector to finish first measurement");
+			set_status("Waiting for the detector to finish first measurement");
       return;
     }
     case DetectorState::NO_CONNECTION:{
       set_state(Tango::FAULT);
-      set_status("Tango device has lost connection with the detector. Make sure the detector is powered and connected to the controlling computer.");
+      set_status("Device server has lost connection with the detector. Make sure the detector is powered and connected to the controlling computer.");
       return;
     }
     case DetectorState::NO_CALIBRATION:{
       set_state(Tango::FAULT);
-			set_status("Device server failed to load calibration data. Make sure file \"calibration/$slave_id.txt\" exists in TANGO server's working directory");
+			set_status("Server failed to load calibration data. Make sure file \"calibration/$slave_id.txt\" exists in device server's working directory");
       return;
     }
     default:{

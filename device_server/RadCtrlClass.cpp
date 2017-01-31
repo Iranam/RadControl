@@ -6,7 +6,6 @@ static const char *SvnPath    = "$HeadURL:  $";
 static const char *HttpServer = "http://www.esrf.eu/computing/cs/tango/tango_doc/ds_doc/";
 #include<RadCtrlClass.h>
 #include<RadCtrl.h>
-#include"../IPC.h"
 using namespace detector;
 using namespace std;
 #include<sys/types.h>
@@ -419,7 +418,9 @@ void RadCtrlClass::device_factory(const Tango::DevVarStringArray *devlist_ptr)
   uint8_t DN=devlist_ptr->length();
   if(DN<N)N=DN;
   for(uint i=0;i<N;++i){
-    ((RadCtrl*)device_list[i])->data=data+i;
+    RadCtrl*dev=(RadCtrl*)device_list[i];
+    dev->data=data+i;
+    dev->determine_state();
   }
 	/*----- PROTECTED REGION END -----*/	//	RadCtrlClass::device_factory_after
 }
