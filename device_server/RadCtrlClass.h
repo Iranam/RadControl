@@ -4,7 +4,6 @@
 
 #include<tango.h>
 #include<RadCtrl.h>
-#include<mqueue.h>
 /*----- PROTECTED REGION END -----*/	//	RadCtrlClass.h
 
 
@@ -110,7 +109,6 @@ class RadCtrlClass : public Tango::DeviceClass
 	public:
     uint8_t NDETECTORS;
 	  char*shmem;
-    mqd_t message_queue;
     detector::DetectorData*data;
 	/*----- PROTECTED REGION END -----*/	//	RadCtrlClass::Additionnal DServer data members
 

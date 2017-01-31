@@ -6,6 +6,8 @@ static const char *RcsId = "$Id:  $";
 using namespace detector;
 #include<string>
 using std::string;
+#include<mqueue.h>
+extern mqd_t message_queue;//defined in main.cc
 
 /*----- PROTECTED REGION END -----*/	//	RadCtrl.cpp
 
@@ -226,9 +228,9 @@ void RadCtrl::read_modbus_id(Tango::Attribute &attr)
 {
 	DEBUG_STREAM << "RadCtrl::read_modbus_id(Tango::Attribute &attr) entering... " << endl;
 	/*----- PROTECTED REGION ID(RadCtrl::read_modbus_id) ENABLED START -----*/
-	//	Set the attribute value
+  *attr_modbus_id_read=data->modbus_id;
 	attr.set_value(attr_modbus_id_read);
-	
+  attr.set_quality(Tango::ATTR_VALID);
 	/*----- PROTECTED REGION END -----*/	//	RadCtrl::read_modbus_id
 }
 
@@ -258,7 +260,8 @@ void RadCtrl::set_exposure(Tango::DevUShort argin)
 {
 	DEBUG_STREAM << "RadCtrl::setExposure()  - " << device_name << endl;
 	/*----- PROTECTED REGION ID(RadCtrl::set_exposure) ENABLED START -----*/
-	
+	mq_send(message_queue)
+    //WIP
 	//	Add your own code
 	
 	/*----- PROTECTED REGION END -----*/	//	RadCtrl::set_exposure
