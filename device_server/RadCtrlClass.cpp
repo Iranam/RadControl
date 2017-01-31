@@ -71,8 +71,6 @@ RadCtrlClass::RadCtrlClass(string &s):Tango::DeviceClass(s)
   if(shmem==MAP_FAILED)throw "MMAP_FAILED";
   data=(DetectorData*)(shmem+DATA_OFFSET);
   close(fd);
-  //open message queue to send commands to RadControl daemon
-  message_queue=mq_open(MQNAME,O_WRONLY|O_NONBLOCK);
 	/*----- PROTECTED REGION END -----*/	//	RadCtrlClass::constructor
 
 	cout2 << "Leaving RadCtrlClass constructor" << endl;
@@ -88,7 +86,6 @@ RadCtrlClass::~RadCtrlClass()
 {
 	/*----- PROTECTED REGION ID(RadCtrlClass::destructor) ENABLED START -----*/
   munmap(shmem,DATA_OFFSET+NDETECTORS*sizeof(DetectorData));
-  mq_close(message_queue);
 	/*----- PROTECTED REGION END -----*/	//	RadCtrlClass::destructor
 
 	_instance = NULL;
