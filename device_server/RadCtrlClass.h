@@ -46,10 +46,12 @@ class exposureAttrib: public Tango::Attr
 {
 public:
 	exposureAttrib():Attr("exposure",
-			Tango::DEV_USHORT, Tango::READ) {};
+			Tango::DEV_USHORT, Tango::READ_WRITE) {};
 	~exposureAttrib() {};
 	virtual void read(Tango::DeviceImpl *dev,Tango::Attribute &att)
 		{(static_cast<RadCtrl *>(dev))->read_exposure(att);}
+	virtual void write(Tango::DeviceImpl *dev,Tango::WAttribute &att)
+		{(static_cast<RadCtrl *>(dev))->write_exposure(att);}
 	virtual bool is_allowed(Tango::DeviceImpl *dev,Tango::AttReqType ty)
 		{return (static_cast<RadCtrl *>(dev))->is_exposure_allowed(ty);}
 };
@@ -65,33 +67,6 @@ public:
 		{(static_cast<RadCtrl *>(dev))->read_modbus_id(att);}
 	virtual bool is_allowed(Tango::DeviceImpl *dev,Tango::AttReqType ty)
 		{return (static_cast<RadCtrl *>(dev))->is_modbus_id_allowed(ty);}
-};
-
-
-//=========================================
-//	Define classes for commands
-//=========================================
-//	Command setExposure class definition
-class setExposureClass : public Tango::Command
-{
-public:
-	setExposureClass(const char   *name,
-	               Tango::CmdArgType in,
-				   Tango::CmdArgType out,
-				   const char        *in_desc,
-				   const char        *out_desc,
-				   Tango::DispLevel  level)
-	:Command(name,in,out,in_desc,out_desc, level)	{};
-
-	setExposureClass(const char   *name,
-	               Tango::CmdArgType in,
-				   Tango::CmdArgType out)
-	:Command(name,in,out)	{};
-	~setExposureClass() {};
-	
-	virtual CORBA::Any *execute (Tango::DeviceImpl *dev, const CORBA::Any &any);
-	virtual bool is_allowed (Tango::DeviceImpl *dev, const CORBA::Any &any)
-	{return (static_cast<RadCtrl *>(dev))->is_setExposure_allowed(any);}
 };
 
 

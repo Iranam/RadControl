@@ -139,26 +139,6 @@ RadCtrlClass *RadCtrlClass::instance()
 //===================================================================
 //	Command execution method calls
 //===================================================================
-//--------------------------------------------------------
-/**
- * method : 		setExposureClass::execute()
- * description : 	method to trigger the execution of the command.
- *
- * @param	device	The device on which the command must be executed
- * @param	in_any	The command input data
- *
- *	returns The command output data (packed in the Any object)
- */
-//--------------------------------------------------------
-CORBA::Any *setExposureClass::execute(Tango::DeviceImpl *device, const CORBA::Any &in_any)
-{
-	cout2 << "setExposureClass::execute(): arrived" << endl;
-	Tango::DevUShort argin;
-	extract(in_any, argin);
-	((static_cast<RadCtrl *>(device))->set_exposure(argin));
-	return new CORBA::Any();
-}
-
 
 //===================================================================
 //	Properties management
@@ -507,7 +487,8 @@ void RadCtrlClass::attribute_factory(vector<Tango::Attr *> &att_list)
 	exposure->set_default_properties(exposure_prop);
 	//	Not Polled
 	exposure->set_disp_level(Tango::OPERATOR);
-	//	Not Memorized
+	exposure->set_memorized();
+	exposure->set_memorized_init(true);
 	att_list.push_back(exposure);
 
 	//	Attribute : modbus_id
@@ -578,15 +559,6 @@ void RadCtrlClass::command_factory()
 	
 	/*----- PROTECTED REGION END -----*/	//	RadCtrlClass::command_factory_before
 
-
-	//	Command setExposure
-	setExposureClass	*psetExposureCmd =
-		new setExposureClass("setExposure",
-			Tango::DEV_USHORT, Tango::DEV_VOID,
-			"milliseconds",
-			"",
-			Tango::OPERATOR);
-	command_list.push_back(psetExposureCmd);
 
 	/*----- PROTECTED REGION ID(RadCtrlClass::command_factory_after) ENABLED START -----*/
 	

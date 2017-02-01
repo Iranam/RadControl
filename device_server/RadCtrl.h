@@ -30,10 +30,10 @@ public:
 
 //	Attribute data members
 public:
-	Tango::DevULong*attr_count_read;
-	Tango::DevFloat*attr_background_read;
-	Tango::DevUShort*attr_exposure_read;
-	Tango::DevUChar*attr_modbus_id_read;
+	Tango::DevULong	*attr_count_read;
+	Tango::DevFloat	*attr_background_read;
+	Tango::DevUShort	*attr_exposure_read;
+	Tango::DevUChar	*attr_modbus_id_read;
 
 //	Constructors and destructors
 public:
@@ -90,6 +90,13 @@ public:
 	 */
 	//--------------------------------------------------------
 	virtual void read_attr_hardware(vector<long> &attr_list);
+	//--------------------------------------------------------
+	/*
+	 *	Method      : RadCtrl::write_attr_hardware()
+	 *	Description : Hardware writing for attributes.
+	 */
+	//--------------------------------------------------------
+	virtual void write_attr_hardware(vector<long> &attr_list);
 
 /**
  *	Attribute count related methods
@@ -117,6 +124,7 @@ public:
  *	Attr type:	Scalar
  */
 	virtual void read_exposure(Tango::Attribute &attr);
+	virtual void write_exposure(Tango::WAttribute &attr);
 	virtual bool is_exposure_allowed(Tango::AttReqType type);
 /**
  *	Attribute modbus_id related methods
@@ -142,14 +150,6 @@ public:
 
 //	Command related methods
 public:
-	/**
-	 *	Command setExposure related method
-	 *	Description: Set exposure in milliseconds
-	 *
-	 *	@param argin milliseconds
-	 */
-	virtual void set_exposure(Tango::DevUShort argin);
-	virtual bool is_setExposure_allowed(const CORBA::Any &any);
 
 
 	//--------------------------------------------------------

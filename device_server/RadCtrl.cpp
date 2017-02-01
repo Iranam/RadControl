@@ -24,7 +24,6 @@ extern mqd_t message_queue;//defined in main.cc
 //================================================================
 //  State         |  Inherited (no method)
 //  Status        |  Inherited (no method)
-//  setExposure   |  set_exposure
 //================================================================
 
 //================================================================
@@ -142,6 +141,21 @@ void RadCtrl::read_attr_hardware(TANGO_UNUSED(vector<long> &attr_list))
 	//	Add your own code
 	/*----- PROTECTED REGION END -----*/	//	RadCtrl::read_attr_hardware
 }
+//--------------------------------------------------------
+/**
+ *	Method      : RadCtrl::write_attr_hardware()
+ *	Description : Hardware writing for attributes
+ */
+//--------------------------------------------------------
+void RadCtrl::write_attr_hardware(TANGO_UNUSED(vector<long> &attr_list))
+{
+	DEBUG_STREAM << "RadCtrl::write_attr_hardware(vector<long> &attr_list) entering... " << endl;
+	/*----- PROTECTED REGION ID(RadCtrl::write_attr_hardware) ENABLED START -----*/
+	
+	//	Add your own code
+	
+	/*----- PROTECTED REGION END -----*/	//	RadCtrl::write_attr_hardware
+}
 
 //--------------------------------------------------------
 /**
@@ -217,6 +231,30 @@ void RadCtrl::read_exposure(Tango::Attribute &attr)
 }
 //--------------------------------------------------------
 /**
+ *	Write attribute exposure related method
+ *	Description: 
+ *
+ *	Data type:	Tango::DevUShort
+ *	Attr type:	Scalar
+ */
+//--------------------------------------------------------
+void RadCtrl::write_exposure(Tango::WAttribute &attr)
+{
+	DEBUG_STREAM<<"RadCtrl::write_exposure(Tango::WAttribute &attr) entering... "<<endl;
+	//	Retrieve write value
+	Tango::DevUShort w_val;
+	attr.get_write_value(w_val);
+	/*----- PROTECTED REGION ID(RadCtrl::write_exposure) ENABLED START -----*/
+  char buf[4];
+  buf[0]=char(detector::Command::SET_EXPOSURE);
+  buf[1]=uchar(data->modbus_id);
+  buf[2]=uchar(w_val);
+  buf[3]=uchar(w_val>>8);
+ 	mq_send(message_queue,buf,sizeof(buf),1);
+	/*----- PROTECTED REGION END -----*/	//	RadCtrl::write_exposure
+}
+//--------------------------------------------------------
+/**
  *	Read attribute modbus_id related method
  *	Description: 
  *
@@ -248,26 +286,6 @@ void RadCtrl::add_dynamic_attributes()
 	/*----- PROTECTED REGION END -----*/	//	RadCtrl::add_dynamic_attributes
 }
 
-//--------------------------------------------------------
-/**
- *	Command setExposure related method
- *	Description: Set exposure in milliseconds
- *
- *	@param argin milliseconds
- */
-//--------------------------------------------------------
-void RadCtrl::set_exposure(Tango::DevUShort argin)
-{
-	DEBUG_STREAM << "RadCtrl::setExposure()  - " << device_name << endl;
-	/*----- PROTECTED REGION ID(RadCtrl::set_exposure) ENABLED START -----*/
-  char buf[4];
-  buf[0]=char(detector::Command::SET_EXPOSURE);
-  buf[1]=uchar(data->modbus_id);
-  buf[2]=uchar(argin);
-  buf[3]=uchar(argin>>8);
-	mq_send(message_queue,buf,sizeof(buf),1);
-	/*----- PROTECTED REGION END -----*/	//	RadCtrl::set_exposure
-}
 //--------------------------------------------------------
 /**
  *	Method      : RadCtrl::add_dynamic_commands()
