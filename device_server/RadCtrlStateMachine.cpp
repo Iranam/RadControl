@@ -58,17 +58,17 @@ bool RadCtrl::is_count_allowed(TANGO_UNUSED(Tango::AttReqType type))
 
 //--------------------------------------------------------
 /**
- *	Method      : RadCtrl::is_background_allowed()
- *	Description : Execution allowed for background attribute
+ *	Method      : RadCtrl::is_doserate_allowed()
+ *	Description : Execution allowed for doserate attribute
  */
 //--------------------------------------------------------
-bool RadCtrl::is_background_allowed(TANGO_UNUSED(Tango::AttReqType type))
+bool RadCtrl::is_doserate_allowed(TANGO_UNUSED(Tango::AttReqType type))
 {
 
-	//	Not any excluded states for background attribute in read access.
-	/*----- PROTECTED REGION ID(RadCtrl::backgroundStateAllowed_READ) ENABLED START -----*/
+	//	Not any excluded states for doserate attribute in read access.
+	/*----- PROTECTED REGION ID(RadCtrl::doserateStateAllowed_READ) ENABLED START -----*/
 	
-	/*----- PROTECTED REGION END -----*/	//	RadCtrl::backgroundStateAllowed_READ
+	/*----- PROTECTED REGION END -----*/	//	RadCtrl::doserateStateAllowed_READ
 	return true;
 }
 

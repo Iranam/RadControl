@@ -29,10 +29,10 @@ extern mqd_t message_queue;//defined in main.cc
 //================================================================
 //  Attributes managed are:
 //================================================================
-//  count       |  Tango::DevULong	Scalar
-//  background  |  Tango::DevFloat	Scalar
-//  exposure    |  Tango::DevUShort	Scalar
-//  modbus_id   |  Tango::DevUChar	Scalar
+//  count      |  Tango::DevULong	Scalar
+//  doserate   |  Tango::DevFloat	Scalar
+//  exposure   |  Tango::DevUShort	Scalar
+//  modbus_id  |  Tango::DevUChar	Scalar
 //================================================================
 
 namespace RadCtrl_ns
@@ -84,7 +84,7 @@ void RadCtrl::delete_device()
 	//	Delete device allocated objects
 	/*----- PROTECTED REGION END -----*/	//	RadCtrl::delete_device
 	delete[] attr_count_read;
-	delete[] attr_background_read;
+	delete[] attr_doserate_read;
 	delete[] attr_exposure_read;
 	delete[] attr_modbus_id_read;
 }
@@ -105,7 +105,7 @@ void RadCtrl::init_device()
 	//	No device property to be read from database
 	
 	attr_count_read = new Tango::DevULong[1];
-	attr_background_read = new Tango::DevFloat[1];
+	attr_doserate_read = new Tango::DevFloat[1];
 	attr_exposure_read = new Tango::DevUShort[1];
 	attr_modbus_id_read = new Tango::DevUChar[1];
 	/*----- PROTECTED REGION ID(RadCtrl::init_device) ENABLED START -----*/
@@ -183,27 +183,27 @@ void RadCtrl::read_count(Tango::Attribute &attr)
 }
 //--------------------------------------------------------
 /**
- *	Read attribute background related method
- *	Description: Estimate of radiation background.
+ *	Read attribute doserate related method
+ *	Description: 
  *
  *	Data type:	Tango::DevFloat
  *	Attr type:	Scalar
  */
 //--------------------------------------------------------
-void RadCtrl::read_background(Tango::Attribute &attr)
+void RadCtrl::read_doserate(Tango::Attribute &attr)
 {
-	DEBUG_STREAM << "RadCtrl::read_background(Tango::Attribute &attr) entering... " << endl;
-	/*----- PROTECTED REGION ID(RadCtrl::read_background) ENABLED START -----*/
+	DEBUG_STREAM << "RadCtrl::read_doserate(Tango::Attribute &attr) entering... " << endl;
+	/*----- PROTECTED REGION ID(RadCtrl::read_doserate) ENABLED START -----*/
   DetectorState S=data->state;
   if(S==DetectorState::OK){
-    *attr_background_read=data->background;
-    attr.set_value(attr_background_read);
+    *attr_doserate_read=data->background;
+    attr.set_value(attr_doserate_read);
     attr.set_quality(Tango::ATTR_VALID);
   }else{
     attr.set_quality(Tango::ATTR_INVALID);
   }
   determine_state();
-	/*----- PROTECTED REGION END -----*/	//	RadCtrl::read_background
+	/*----- PROTECTED REGION END -----*/	//	RadCtrl::read_doserate
 }
 //--------------------------------------------------------
 /**
@@ -240,9 +240,9 @@ void RadCtrl::read_exposure(Tango::Attribute &attr)
 //--------------------------------------------------------
 void RadCtrl::write_exposure(Tango::WAttribute &attr)
 {
-	DEBUG_STREAM<<"RadCtrl::write_exposure(Tango::WAttribute &attr) entering... "<<endl;
+	DEBUG_STREAM << "RadCtrl::write_exposure(Tango::WAttribute &attr) entering... " << endl;
 	//	Retrieve write value
-	Tango::DevUShort w_val;
+	Tango::DevUShort	w_val;
 	attr.get_write_value(w_val);
 	/*----- PROTECTED REGION ID(RadCtrl::write_exposure) ENABLED START -----*/
   char buf[4];

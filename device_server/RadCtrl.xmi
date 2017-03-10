@@ -31,13 +31,13 @@
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
       <properties description="Count during last exposition period" label="Count" unit="" standardUnit="" displayUnit="" format="" maxValue="" minValue="" maxAlarm="" minAlarm="" maxWarning="" minWarning="" deltaTime="" deltaValue=""/>
     </attributes>
-    <attributes name="background" attType="Scalar" rwType="READ" displayLevel="OPERATOR" polledPeriod="0" maxX="" maxY="" allocReadMember="true" isDynamic="false">
+    <attributes name="doserate" attType="Scalar" rwType="READ" displayLevel="OPERATOR" polledPeriod="0" maxX="" maxY="" allocReadMember="true" isDynamic="false">
       <dataType xsi:type="pogoDsl:FloatType"/>
       <changeEvent fire="false" libCheckCriteria="false"/>
       <archiveEvent fire="false" libCheckCriteria="false"/>
       <dataReadyEvent fire="false" libCheckCriteria="true"/>
       <status abstract="false" inherited="false" concrete="true" concreteHere="true"/>
-      <properties description="Estimate of radiation background." label="Background" unit="microSieverts/hour" standardUnit="uSv/h" displayUnit="uSv/h" format="%f.3" maxValue="" minValue="0" maxAlarm="0.3" minAlarm="" maxWarning="0.2" minWarning="" deltaTime="" deltaValue=""/>
+      <properties description="" label="dose rate" unit="uSv/h" standardUnit="uSv/h" displayUnit="uSv/h" format="%f.3" maxValue="" minValue="0" maxAlarm="0.3" minAlarm="" maxWarning="0.2" minWarning="" deltaTime="" deltaValue=""/>
     </attributes>
     <attributes name="exposure" attType="Scalar" rwType="READ_WRITE" displayLevel="OPERATOR" polledPeriod="0" maxX="" maxY="" memorized="true" memorizedAtInit="true" allocReadMember="true" isDynamic="false">
       <dataType xsi:type="pogoDsl:UShortType"/>

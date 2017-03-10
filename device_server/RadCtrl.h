@@ -31,7 +31,7 @@ public:
 //	Attribute data members
 public:
 	Tango::DevULong	*attr_count_read;
-	Tango::DevFloat	*attr_background_read;
+	Tango::DevFloat	*attr_doserate_read;
 	Tango::DevUShort	*attr_exposure_read;
 	Tango::DevUChar	*attr_modbus_id_read;
 
@@ -108,14 +108,14 @@ public:
 	virtual void read_count(Tango::Attribute &attr);
 	virtual bool is_count_allowed(Tango::AttReqType type);
 /**
- *	Attribute background related methods
- *	Description: Estimate of radiation background.
+ *	Attribute doserate related methods
+ *	Description: 
  *
  *	Data type:	Tango::DevFloat
  *	Attr type:	Scalar
  */
-	virtual void read_background(Tango::Attribute &attr);
-	virtual bool is_background_allowed(Tango::AttReqType type);
+	virtual void read_doserate(Tango::Attribute &attr);
+	virtual bool is_doserate_allowed(Tango::AttReqType type);
 /**
  *	Attribute exposure related methods
  *	Description: 

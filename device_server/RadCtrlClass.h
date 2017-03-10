@@ -28,17 +28,17 @@ public:
 		{return (static_cast<RadCtrl *>(dev))->is_count_allowed(ty);}
 };
 
-//	Attribute background class definition
-class backgroundAttrib: public Tango::Attr
+//	Attribute doserate class definition
+class doserateAttrib: public Tango::Attr
 {
 public:
-	backgroundAttrib():Attr("background",
+	doserateAttrib():Attr("doserate",
 			Tango::DEV_FLOAT, Tango::READ) {};
-	~backgroundAttrib() {};
+	~doserateAttrib() {};
 	virtual void read(Tango::DeviceImpl *dev,Tango::Attribute &att)
-		{(static_cast<RadCtrl *>(dev))->read_background(att);}
+		{(static_cast<RadCtrl *>(dev))->read_doserate(att);}
 	virtual bool is_allowed(Tango::DeviceImpl *dev,Tango::AttReqType ty)
-		{return (static_cast<RadCtrl *>(dev))->is_background_allowed(ty);}
+		{return (static_cast<RadCtrl *>(dev))->is_doserate_allowed(ty);}
 };
 
 //	Attribute exposure class definition

@@ -442,29 +442,29 @@ void RadCtrlClass::attribute_factory(vector<Tango::Attr *> &att_list)
 	//	Not Memorized
 	att_list.push_back(count);
 
-	//	Attribute : background
-	backgroundAttrib	*background = new backgroundAttrib();
-	Tango::UserDefaultAttrProp	background_prop;
-	background_prop.set_description("Estimate of radiation background.");
-	background_prop.set_label("Background");
-	background_prop.set_unit("microSieverts/hour");
-	background_prop.set_standard_unit("uSv/h");
-	background_prop.set_display_unit("uSv/h");
-	background_prop.set_format("%f.3");
-	//	max_value	not set for background
-	background_prop.set_min_value("0");
-	background_prop.set_max_alarm("0.3");
-	//	min_alarm	not set for background
-	background_prop.set_max_warning("0.2");
-	//	min_warning	not set for background
-	//	delta_t	not set for background
-	//	delta_val	not set for background
+	//	Attribute : doserate
+	doserateAttrib	*doserate = new doserateAttrib();
+	Tango::UserDefaultAttrProp	doserate_prop;
+	//	description	not set for doserate
+	doserate_prop.set_label("dose rate");
+	doserate_prop.set_unit("uSv/h");
+	doserate_prop.set_standard_unit("uSv/h");
+	doserate_prop.set_display_unit("uSv/h");
+	doserate_prop.set_format("%f.3");
+	//	max_value	not set for doserate
+	doserate_prop.set_min_value("0");
+	doserate_prop.set_max_alarm("0.3");
+	//	min_alarm	not set for doserate
+	doserate_prop.set_max_warning("0.2");
+	//	min_warning	not set for doserate
+	//	delta_t	not set for doserate
+	//	delta_val	not set for doserate
 	
-	background->set_default_properties(background_prop);
+	doserate->set_default_properties(doserate_prop);
 	//	Not Polled
-	background->set_disp_level(Tango::OPERATOR);
+	doserate->set_disp_level(Tango::OPERATOR);
 	//	Not Memorized
-	att_list.push_back(background);
+	att_list.push_back(doserate);
 
 	//	Attribute : exposure
 	exposureAttrib	*exposure = new exposureAttrib();

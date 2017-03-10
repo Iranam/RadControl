@@ -12,16 +12,20 @@ enum class DetectorState{OK,DISABLED,INIT,NO_CONNECTION,NO_CALIBRATION,UNKNOWN};
 //Array of DetectorData
 const uint8_t NUMBER_OFFSET=1;
 const uint8_t DATA_OFFSET=2;
+/*First byte - state:
+ *(state>>0)&1 - daemon is running
+ *(state>>1)&1 - daemon is not writing to mysql database because it is unavailable
+ * */
+//DetectorData shall only be written by RadControl daemon
+struct DetectorData{
+  DetectorType type;
+  DetectorState state;
 //OK means data is valid
 //DISABLED means RadControl process has finished
 //INIT means data is invalid, and has not yet been actually read from device
 //NO_CONNECTION means data is invalid, and device is unavailable
 //NO_CALIBRATION means all data except background is valid, and background is invalid
 //UNKNOWN means something has gone terribly wrong
-//DetectorData shall only be written by RadControl daemon
-struct DetectorData{
-  DetectorType type;
-  DetectorState state;
   uint modbus_id;
   uint count;
   float background;

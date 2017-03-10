@@ -81,6 +81,7 @@ void cleanup(){
   if(detectors!=nullptr)delete[]detectors;
   mq_close(message_queue);
   mq_unlink(MQNAME);
+  *shmem=0x00;//Set status byte to show that daemon is not running
   munmap(shmem,NDETECTORS*sizeof(DetectorData)+DATA_OFFSET);
 #ifndef NODATABASE
   if(db.open())db.close();
@@ -188,13 +189,16 @@ try{
   message_queue=mq_open(MQNAME,O_RDONLY|O_CREAT,00666,&attr);
   if(message_queue==-1)throw Exception::OPEN_MESSAGE_QUEUE_FAILED;
   }
-  //TODO:error handling
-  //Main loop
-  //for each 
+  //Initialize detectors:
   for(uint i=0;i<NDETECTORS;++i){
     data[i].modbus_id=modbus_ids[i];
     detectors[i].init(&data[i]);
 		msync(shmem,NDETECTORS*sizeof(DetectorData),MS_ASYNC|MS_INVALIDATE);
+  }
+  //Set status byte to show that daemon is running:
+  {char status=1;
+  if(!db.open())status|=2;
+  *shmem=status;
   }
 #ifdef DUMMY
   log("Started in DUMMY MODE");
