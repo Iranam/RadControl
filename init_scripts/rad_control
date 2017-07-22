@@ -9,6 +9,7 @@
 # Description:       Controls the RadControl daemon
 ### END INIT INFO
 set -e #stop script at first error
+source /lib/lsb/init-functions
 
 case "$1" in
   ('start')
