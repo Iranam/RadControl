@@ -196,7 +196,7 @@ void RadCtrl::read_doserate(Tango::Attribute &attr)
 	/*----- PROTECTED REGION ID(RadCtrl::read_doserate) ENABLED START -----*/
   DetectorState S=data->state;
   if(S==DetectorState::OK){
-    *attr_doserate_read=data->background;
+    *attr_doserate_read=data->doserate;
     attr.set_value(attr_doserate_read);
     attr.set_quality(Tango::ATTR_VALID);
   }else{

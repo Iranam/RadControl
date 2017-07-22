@@ -4,6 +4,7 @@ static const char *TagName    = "$Name:  $";
 static const char *CvsPath    = "$Source:  $";
 static const char *SvnPath    = "$HeadURL:  $";
 static const char *HttpServer = "http://www.esrf.eu/computing/cs/tango/tango_doc/ds_doc/";
+//^ I have no idea what that is
 #include<RadCtrlClass.h>
 #include<RadCtrl.h>
 using namespace detector;

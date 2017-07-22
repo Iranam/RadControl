@@ -26,7 +26,7 @@ void Detector::init(DetectorData*nd){
   d->type=DetectorType::UNKNOWN_TYPE;
   d->state=DetectorState::INIT;
   d->count=0;
-  d->background=0;
+  d->doserate=0;
   d->exposure=0;
   d->exposure_by_count=0;
   //modbus_id must be set by main()
@@ -191,7 +191,7 @@ void Detector::update(){
       union{uint16_t buf[2];uint u;};
       if(modbus_read_registers(ctx,104,2,buf)<0)throw LOST_CONNECTION;
       d->count=u;
-      d->background=(*calibration)(double(u)/d->exposure);
+      d->doserate=(*calibration)(double(u)/d->exposure);
     }else{//NEUTRON
       //we want to read registers:
       //38-count
@@ -200,7 +200,7 @@ void Detector::update(){
       uint16_t buf[7];
       if(modbus_read_registers(ctx,38,7,buf)<0)throw LOST_CONNECTION;
       d->count=buf[0];
-      d->background=modbus_get_float(buf+5);
+      d->doserate=modbus_get_float(buf+5);
     }
     //5.write data to database
 #ifndef NODATABASE
@@ -208,7 +208,7 @@ void Detector::update(){
       QSqlQuery query;
       query.prepare("INSERT INTO readings(modbus_id,EDR,count,exposition,exposition_by_count,time) VALUES (?,?,?,?,?,NOW())");
       query.bindValue(0,QVariant(d->modbus_id));
-      query.bindValue(1,QVariant(d->background));
+      query.bindValue(1,QVariant(d->doserate));
       query.bindValue(2,QVariant(d->count));
       query.bindValue(3,QVariant(d->exposure));
       query.bindValue(4,QVariant(d->exposure_by_count));

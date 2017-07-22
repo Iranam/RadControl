@@ -12,7 +12,7 @@ struct DetectorData{
   DetectorState state;//Состояние (см.ниже)
   uint modbus_id;//modbus-адрес
   uint count;//счёт (последнее измерение)
-  float background;//текущее показание мощности эквивалентной дозы, после преобразования
+  float doserate;//текущее показание мощности эквивалентной дозы, после преобразования
   uint16_t exposure,//экспозиция
        exposure_by_count;//экспозиция по счёту (для гамма здесь стоит 0)
   float sensitivity;//чувствительность (для гамма здесь стоит 0)

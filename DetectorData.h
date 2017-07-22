@@ -24,11 +24,11 @@ struct DetectorData{
 //DISABLED means RadControl process has finished
 //INIT means data is invalid, and has not yet been actually read from device
 //NO_CONNECTION means data is invalid, and device is unavailable
-//NO_CALIBRATION means all data except background is valid, and background is invalid
+//NO_CALIBRATION means all data except doserate is valid, and doserate is invalid
 //UNKNOWN means something has gone terribly wrong
   uint modbus_id;
   uint count;
-  float background;
+  float doserate;
   uint16_t exposure,
        exposure_by_count;//neutron only
   float sensitivity;//neutron only
