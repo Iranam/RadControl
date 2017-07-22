@@ -1,0 +1,31 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          tango
+# Required-Start:    mysql RadControl
+# Required-Stop:     mysql RadControl
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start and stop the TANGO database server
+# Description:       Controls the main TANGO database server
+### END INIT INFO
+set -e #stop script at first error
+
+case "$1" in
+  ('start')
+    /bin/su - ivan -s /bin/sh -c"/usr/bin/tango start"
+    sleep 3
+    /bin/su - ivan -s /bin/sh -c"/usr/bin/Starter iROBO &"
+  ;;('stop')
+    killall Starter || true
+    /bin/su - ivan -s /bin/sh -c"/usr/bin/tango stop"
+  ;;('restart')
+    $0 stop && sleep 3 && $0 start 
+  ;;('reload')
+    $0 restart
+  ;;('force-reload')
+    $0 restart
+  ;;('status')
+	  /usr/bin/tango status
+esac
+
+exit 0

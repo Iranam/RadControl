@@ -1,0 +1,34 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          RadControl
+# Required-Start:    mysql
+# Required-Stop:     mysql
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start and stop the RadControl daemon
+# Description:       Controls the RadControl daemon
+### END INIT INFO
+set -e #stop script at first error
+
+case "$1" in
+  ('start')
+		su - ivan -s /bin/sh -c "cd /home/ivan/Programs/RadControl/daemon;./RadControl &"
+  ;;('stop')
+	  killall RadControl
+  ;;('restart')
+    $0 stop && sleep 3 && $0 start 
+  ;;('reload')
+    $0 restart
+  ;;('force-reload')
+    $0 restart
+  ;;('status')
+		if [ "$(ps -e|grep RadControl)" == "" ];
+	  then
+			log_action_msg "OK"
+	  else
+			log_action_msg "OFF"
+		fi
+esac
+
+exit 0
+
