@@ -74,9 +74,9 @@ void Interpolant::construct(){
 		real res=2*x1*(slp2-slp1)+slp1*(x2+x1)-slp2*(x1+x0);
     res/=x2-x0;
 		der[i]=res;}*/
-	for(uint i=1;i<N-1;i++)der[i]=(y[i+1]-y[i-1])/(px[i+1]-px[i-1]);
   /*We are using a less-than-usually orthodox way of estimating derivatives, but it usually
    *makes the interpolant monotonous*/
+	for(uint i=1;i<N-1;i++)der[i]=(y[i+1]-y[i-1])/(px[i+1]-px[i-1]);
   der[N-1]=(y[N-1]-y[N-2])/(px[N-1]-px[N-2]);
 #ifdef INTERPOLANT_DEBUG
 	for(uint i=0;i<N;i++)clog<<"der["<<i<<"]="<<der[i]<<endl;
@@ -100,7 +100,6 @@ void Interpolant::construct(){
 		 *rightder: dr/w2 - dr/w 0
 		 * */
 #ifndef _NOWARNINGS
-    //TODO:doesn't work yet
     real A=a[i],B=b[i],C=c[i],maxx;
     real D=B*B-3*A*C;
     if(D>0&&A!=0&&(maxx=(-B+sqrt(D))/(3*A))>0&&maxx<w){

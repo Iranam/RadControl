@@ -164,9 +164,9 @@ void Detector::update(){
           }
         }
       }else{//NEUTRON
-        //set exposure(register 49) to default=1(seconds)
+        //set exposure(register 49)
         if(modbus_write_register(ctx,49,d->exposure)<0)throw LOST_CONNECTION;
-        //set exposure by count (register 21) to default=100(impulses)
+        //set exposure by count (register 21)
         if(modbus_write_register(ctx,21,d->exposure_by_count)<0)throw LOST_CONNECTION;
         //TODO sensitivity
         //if(modbus_write_register(ctx,36,1)<0)throw LOST_CONNECTION;
@@ -188,11 +188,10 @@ void Detector::update(){
     if(d->type==DetectorType::GAMMA){
       //we want to read registers:
       //104:105-count
-      //106:107-background
-      union{uint16_t buf[4];uint u;float f[2];};
-      if(modbus_read_registers(ctx,104,4,buf)<0)throw LOST_CONNECTION;
+      union{uint16_t buf[2];uint u;};
+      if(modbus_read_registers(ctx,104,2,buf)<0)throw LOST_CONNECTION;
       d->count=u;
-      d->background=(*calibration)(f[1]);
+      d->background=(*calibration)(double(u)/d->exposure);
     }else{//NEUTRON
       //we want to read registers:
       //38-count
@@ -225,7 +224,6 @@ void Detector::update(){
     }
     d->state=DetectorState::OK;
     {int t=d->exposure;
-    if(t<=100)t=300;
     if(t>=10000)t=10000;
     time_to_update=t;
     }

@@ -70,9 +70,6 @@ void load_options(){
   fscanf(file,"MODBUS_IDS=");
   for(uint i=0;i<NDETECTORS;++i)fscanf(file,"%d",modbus_ids+i);
   fscanf(file,"\nDEVICE_NODE=%ms",&node_name);
-#ifdef DEBUG
-  printf("DEBUG=%s\n",node_name);
-#endif
   fclose(file);
 #pragma GCC diagnostic pop
 }
@@ -80,11 +77,11 @@ void load_options(){
 void cleanup(){
   if(detectors!=nullptr)delete[]detectors;
   mq_close(message_queue);
-  mq_unlink(MQNAME);
+  //mq_unlink(MQNAME); do not unlink: maybe someone is sending messages while daemon is restatred
   *shmem=0x00;//Set status byte to show that daemon is not running
   munmap(shmem,NDETECTORS*sizeof(DetectorData)+DATA_OFFSET);
 #ifndef NODATABASE
-  if(db.open())db.close();
+  if(db.isOpen())db.close();
 #endif
   modbus_close(ctx);
   modbus_free(ctx);
@@ -176,30 +173,29 @@ try{
   shmem=(char*)mmap(NULL,NDETECTORS*sizeof(DetectorData)+DATA_OFFSET,PROT_WRITE|PROT_READ,MAP_SHARED,fd,0);
   if(shmem==MAP_FAILED)throw Exception::MMAP_FAILED;
   close(fd);
-  //Create detector objects and initialize detector data
-  *((char*)shmem+NUMBER_OFFSET)=NDETECTORS;//write number of detectors to shared memory
-  DetectorData*data=(DetectorData*)(shmem+DATA_OFFSET);//other bytes are array of DetectorData
-  detectors=new Detector[NDETECTORS];
   //Open message queue for incoming commands
   {mq_attr attr;
   attr.mq_flags=0;//blocking mode
   attr.mq_maxmsg=10;
   attr.mq_msgsize=MESSAGE_MAX_SIZE;
-  mq_unlink(MQNAME);//delete message queue if it exists
+  //mq_unlink(MQNAME); --- if the queue already exists from last launch, open it
   message_queue=mq_open(MQNAME,O_RDONLY|O_CREAT,00666,&attr);
   if(message_queue==-1)throw Exception::OPEN_MESSAGE_QUEUE_FAILED;
   }
-  //Initialize detectors:
+  //Create detector objects and initialize detector data
+  *((char*)shmem+NUMBER_OFFSET)=NDETECTORS;//write number of detectors to shared memory
+  DetectorData*data=(DetectorData*)(shmem+DATA_OFFSET);//other bytes are array of DetectorData
+  detectors=new Detector[NDETECTORS];
   for(uint i=0;i<NDETECTORS;++i){
     data[i].modbus_id=modbus_ids[i];
     detectors[i].init(&data[i]);
-		msync(shmem,NDETECTORS*sizeof(DetectorData),MS_ASYNC|MS_INVALIDATE);
   }
   //Set status byte to show that daemon is running:
   {char status=1;
-  if(!db.open())status|=2;
+  if(!db.isOpen())status|=2;
   *shmem=status;
   }
+	msync(shmem,NDETECTORS*sizeof(DetectorData)+DATA_OFFSET,MS_ASYNC|MS_INVALIDATE);
 #ifdef DUMMY
   log("Started in DUMMY MODE");
 #else
