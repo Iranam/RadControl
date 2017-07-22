@@ -25,11 +25,11 @@ sh -c"cd /home/ivan/Programs/RadControl/component map && exec ./comp-map"
 *Как изменить жёлтые/красные границы показаний на мнемосхеме?
 К сожалению, для этого придётся править код и пересобирать мнемосхему.
 Исходный код мнемосхемы лежит в директории
-/home/ivan/Programs/RadControl/component-map/
+/home/ivan/Programs/RadControl/hmi-tango/
 Значения нужно изменить в строчках 47-48 файла Detector.cc
 
 *Как пересобрать мнемосхему?
-cd /home/ivan/Programs/RadControl/component-map/
+cd /home/ivan/Programs/RadControl/hmi-tango/
 make
 Мнемосхема использует систему сборки qmake. Подробно прочитать про неё можно в документации Qt: открывается командой
 assistant

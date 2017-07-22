@@ -42,7 +42,7 @@ void Detector::update(){
   DetectorData d=*data;
   if(d.state==DetectorState::OK){
     body->setBrush(QBrush(qRgb(138,226,52)));
-    float bg=d.background;
+    float bg=d.doserate;
     QString text=QString::fromUtf8("%1").arg(bg,0,'f',3);
     if(bg<0.09)line->setStyleSheet("QLineEdit{color:black;background:rgb(138,226,52);}");
     else if(bg<10)line->setStyleSheet("QLineEdit{color:black;background:yellow;}");
